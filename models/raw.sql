@@ -85,39 +85,6 @@ CREATE TABLE stores_raw (
   sales_rep_username VARCHAR
 );
 
-CREATE TABLE call_cycle_raw (
-  __typename VARCHAR,
-  call_status VARCHAR,
-  _lastChangedAt DOUBLE,
-  call_time VARCHAR,
-  end_date VARCHAR,
-  stores STRUCT (
-    store_id VARCHAR,
-    mins_per_visit VARCHAR,
-    anotherDis BOOLEAN,
-    supplier_username VARCHAR,
-    store_name VARCHAR,
-    checked BOOLEAN,
-    disabled BOOLEAN,
-    "label" VARCHAR,
-    "value" VARCHAR,
-    frequency VARCHAR,
-    supplier VARCHAR
-  ) [],
-  createdAt VARCHAR,
-  retailer VARCHAR,
-  call_cycle_name VARCHAR,
-  country STRUCT ("value" VARCHAR, "label" VARCHAR) [],
-  call_id VARCHAR,
-  state STRUCT ("value" VARCHAR, "label" VARCHAR) [],
-  _version DOUBLE,
-  call_cycle_freq VARCHAR,
-  start_date VARCHAR,
-  updatedAt VARCHAR,
-  supplier_username VARCHAR,
-  id UUID,
-  supplier_name VARCHAR
-);
 
 CREATE TABLE task_raw (
   documentAdd STRUCT (
