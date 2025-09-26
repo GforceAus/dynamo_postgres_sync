@@ -45,6 +45,7 @@ schema-all: schema-tasks schema-stores schema-call-cycles
 The =extract= command downloads all data from Dynamo DB as a json file. It takes 10 minutes for 100k tasks. There is 90K tasks as of [2025-09-26 Fri] which is 300 MB. This assumes the data will fit in memory.
 ** Transform
 *** Overview
+**** First Approach
 1. Create Classes using =datamodel-code-generator.datemodel-codegen=
 2. Create a DuckDB Table for each class:
    #+begin_src python
@@ -77,6 +78,89 @@ CREATE TABLE task_raw AS (SELECT * FROM read_json_auto('./data/raw/GforceTasks-n
 CREATE TABLE call_cycle_raw AS (SELECT * FROM read_json_auto('./data/raw/GforceCallCycle-notow4pikzczbpjg42gytvbuci-production.json'));
    #+end_src
 5. Normalize into new tables
+
+**** Simpler Approach
+1. Load the Data into a =_raw= table
+   #+begin_src sh
+duckdb data/all.duckdb
+   #+end_src
+   #+begin_src sql
+CREATE TABLE stores_raw AS (SELECT * FROM read_json_auto('./data/raw/GforceStore-notow4pikzczbpjg42gytvbuci-production.json'));
+CREATE TABLE task_raw AS (SELECT * FROM read_json_auto('./data/raw/GforceTasks-notow4pikzczbpjg42gytvbuci-production.json'));
+CREATE TABLE call_cycle_raw AS (SELECT * FROM read_json_auto('./data/raw/GforceCallCycle-notow4pikzczbpjg42gytvbuci-production.json'));
+   #+end_src
+2. Get the types of each table
+   #+begin_src sh
+duckdb data/all.duckdb '.schema stores_raw'     >> ./data/models/raw.sql
+duckdb data/all.duckdb '.schema call_cycle_raw' >> ./data/models/raw.sql
+duckdb data/all.duckdb '.schema task_raw'       >> ./data/models/raw.sql
+# Use sqlite format as duckdb is not supported
+sql-formatter --fix -l sqlite  ./data/models/raw.sql
+   #+end_src
+3. Copy that file into a new SQL File that normalizes the types
+
+   For example the =stores_raw= table is:
+
+   #+begin_src sql
+CREATE TABLE stores_raw (
+  store_manager VARCHAR,
+  support_rep_username VARCHAR,
+  retailer_name VARCHAR,
+  trade_drive_trough VARCHAR,
+  visit_time VARCHAR,
+  country VARCHAR,
+  visit_days STRUCT ("name" VARCHAR, checked BOOLEAN) [],
+  state VARCHAR,
+  _version DOUBLE,
+  territory VARCHAR,
+  whare_sfs VARCHAR,
+  additionalRep STRUCT (
+    rep_cover VARCHAR,
+    last_name VARCHAR,
+    from_date VARCHAR,
+    to_date VARCHAR,
+    rep_cover_username VARCHAR,
+    first_name VARCHAR
+  ) [],
+  region VARCHAR,
+  id UUID,
+  support_status VARCHAR,
+  senior_rep_username VARCHAR,
+  __typename VARCHAR,
+  _lastChangedAt DOUBLE,
+  store_grade VARCHAR,
+  store_id VARCHAR,
+  senior_status VARCHAR,
+  contact STRUCT (
+    "name" VARCHAR,
+    "position" VARCHAR,
+    phone VARCHAR,
+    email VARCHAR
+  ) [],
+  createdAt VARCHAR,
+  address VARCHAR,
+  visit_freq VARCHAR,
+  updatedAt VARCHAR,
+  store_size VARCHAR,
+  mob_number VARCHAR,
+  store_manager_email VARCHAR,
+  visit_start_week_no VARCHAR,
+  store_name VARCHAR,
+  store_status VARCHAR,
+  notes STRUCT (datetime VARCHAR, notes VARCHAR) [],
+  sales_status VARCHAR,
+  sales_rep_notes STRUCT (datetime VARCHAR, notes VARCHAR) [],
+  sales_rep_username VARCHAR
+);
+   #+end_src
+
+   Consider the =visit_days STRUCT (...) []= field, this would be replaced with a table to join on:
+
+   #+begin_src sql
+CREATE TABLE store_visit_days (store_id VARCHAR, name VARCHAR, checked BOOLEAN);
+   #+end_src
+
+   If it was a single value rather than a list, then the new table would have an id field and the value in the table would have the corresponding id.
 *** Type Mapping
 The output data type for Stores looks like this:
 
