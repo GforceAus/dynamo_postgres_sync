@@ -1,0 +1,53 @@
+#+title: Indexes
+The =indexes= command prints the indices of each table:
+
+#+begin_src sh
+uv run -- python main.py indexes
+#+end_src
+
+#+begin_example
+=== GforceTasks-notow4pikzczbpjg42gytvbuci-production ===
+HASH: id
+Global Secondary Indexes:
+  Index: task_status-index
+    HASH: task_status
+  Index: PK-SK-index
+    HASH: PK
+    RANGE: SK
+  Index: task_name-supplier_id-index
+    HASH: task_name
+    RANGE: supplier_id
+  Index: bySeniorRepUsername
+    HASH: senior_rep_username
+    RANGE: taskDateISO8601
+  Index: task_id-supplier_id-index
+    HASH: task_id
+    RANGE: supplier_id
+
+=== GforceStore-notow4pikzczbpjg42gytvbuci-production ===
+HASH: id
+Global Secondary Indexes:
+  Index: store_id-index
+    HASH: store_id
+
+=== GforceCallCycle-notow4pikzczbpjg42gytvbuci-production ===
+HASH: id
+Global Secondary Indexes:
+  Index: call_id-index
+    HASH: call_id
+
+#+end_example
+
+
+Unfortunately, this suggests we cannot:
+
+1. Download only modified data:
+   - None of the tables have indexes on modification timestamps
+   - Without a secondary index on a timestamp field, you can't efficiently query by modification date
+2. Download only recently modified data:
+   - Only the GforceTasks table has a date-related index: bySeniorRepUsername with range key taskDateISO8601
+   - This could work for time-based queries, but only if you know the senior_rep_username values to query against
+   - The other tables (GforceStore, GforceCallCycle) have no date-based indexes
+
+
+Probably simpler to =scan= (dump) all tables and filter thereafter.
