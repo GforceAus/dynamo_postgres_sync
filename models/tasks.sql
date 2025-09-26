@@ -144,7 +144,7 @@ OR REPLACE TABLE task_rep_images (
   "key" VARCHAR,
   isUploaded VARCHAR,
   -- task_raw.photos_from_rep
-  filename VARCHAR,
+  -- filename VARCHAR,
   PRIMARY KEY (task_uuid, key)
 );
 

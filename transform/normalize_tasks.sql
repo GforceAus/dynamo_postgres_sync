@@ -88,3 +88,32 @@ FROM
 WHERE
   rep_images_cannot_complete IS NOT NULL
   AND len (rep_images_cannot_complete) > 0;
+
+-- Insert into task_rep_images table
+INSERT OR REPLACE INTO
+  task_rep_images
+SELECT
+  id AS task_uuid,
+  task_id,
+  store_id,
+  store_name,
+  supplier_id,
+  supplier_name,
+  state,
+  unnest (rep_images).bucket,
+  unnest (rep_images).localUri,
+  unnest (rep_images).mimeType,
+  unnest (rep_images).region,
+  unnest (rep_images).key,
+  unnest (rep_images).isUploaded,
+  -- Array is in the same order
+  -- Sometimes this is null, no reason seemingly
+  -- No impact on photo availablility
+  -- If it's nullable, there's no point, derive it from key
+  -- unnest (photos_from_rep) AS filename
+FROM
+  task_raw r,
+WHERE
+  r.rep_images IS NOT NULL
+  AND len (r.rep_images) > 0
+
