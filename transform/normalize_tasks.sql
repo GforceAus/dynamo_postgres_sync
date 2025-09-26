@@ -39,3 +39,18 @@ WHERE
 INSERT OR REPLACE INTO
   task_call_cycles
 SELECT * FROM tmp;
+
+-- Insert into task_photos table
+INSERT OR REPLACE INTO
+  task_photos
+SELECT
+  id AS task_uuid,
+  unnest (task_photos).task_id,
+  unnest (task_photos).client_photos_shareable,
+  unnest (task_photos).photo_name,
+  unnest (task_photos).task_photos_notes
+FROM
+  task_raw
+WHERE
+  task_photos IS NOT NULL
+  AND len (task_photos) > 0;
