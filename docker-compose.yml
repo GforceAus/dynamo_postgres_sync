@@ -14,10 +14,10 @@ services:
       - PGPASSWORD=${PGPASSWORD}
       - PGDATABASE=${PGDATABASE}
     volumes:
-      - ./data:/app/data
-      - ./models:/app/models
-      - ./load:/app/load
-      - ./.env:/app/.env
+      - ./data:/app/data:Z
+      - ./models:/app/models:Z
+      - ./load:/app/load:Z
+      - ./.env:/app/.env:Z
     restart: unless-stopped
     working_dir: /app
     command: python main.py --help
