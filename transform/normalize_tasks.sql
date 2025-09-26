@@ -19,26 +19,29 @@ WHERE
 
 -- Insert into task_call_cycles table
 -- need a tmp table for the to_json cast
-CREATE OR REPLACE TABLE tmp AS (
-SELECT
-  id AS task_uuid,
-  unnest (callCycle).call_cycle_name AS call_cycle_name,
-  unnest (callCycle).call_status AS call_status,
-  unnest (callCycle).retailer AS retailer,
-  unnest (callCycle).call_id AS call_id,
-  unnest (callCycle).storeList AS storeList,
-FROM
-  task_raw
-WHERE
-  callCycle IS NOT NULL
-  AND len (callCycle) > 0
+CREATE
+OR REPLACE TABLE tmp AS (
+  SELECT
+    id AS task_uuid,
+    unnest (callCycle).call_cycle_name AS call_cycle_name,
+    unnest (callCycle).call_status AS call_status,
+    unnest (callCycle).retailer AS retailer,
+    unnest (callCycle).call_id AS call_id,
+    unnest (callCycle).storeList AS storeList,
+  FROM
+    task_raw
+  WHERE
+    callCycle IS NOT NULL
+    AND len (callCycle) > 0
 );
-
 
 -- Will automatically cast to JSON
 INSERT OR REPLACE INTO
   task_call_cycles
-SELECT * FROM tmp;
+SELECT
+  *
+FROM
+  tmp;
 
 -- Insert into task_photos table
 INSERT OR REPLACE INTO
@@ -89,34 +92,6 @@ WHERE
   rep_images_cannot_complete IS NOT NULL
   AND len (rep_images_cannot_complete) > 0;
 
--- Insert into task_rep_images table
-INSERT OR REPLACE INTO
-  task_rep_images
-SELECT
-  id AS task_uuid,
-  task_id,
-  store_id,
-  store_name,
-  supplier_id,
-  supplier_name,
-  state,
-  unnest (rep_images).bucket,
-  unnest (rep_images).localUri,
-  unnest (rep_images).mimeType,
-  unnest (rep_images).region,
-  unnest (rep_images).key,
-  unnest (rep_images).isUploaded,
-  -- Array is in the same order
-  -- Sometimes this is null, no reason seemingly
-  -- No impact on photo availablility
-  -- If it's nullable, there's no point, derive it from key
-  -- unnest (photos_from_rep) AS filename
-FROM
-  task_raw r,
-WHERE
-  r.rep_images IS NOT NULL
-  AND len (r.rep_images) > 0;
-
 -- Insert into task_comments table
 INSERT OR REPLACE INTO
   task_comments
@@ -132,74 +107,136 @@ WHERE
   task_comments IS NOT NULL
   AND len (task_comments) > 0;
 
+-- Insert into task_rep_images table
+CREATE
+or REPLACE TABLE tmp AS (
+  SELECT
+    id AS task_uuid,
+    task_id,
+    store_id,
+    store_name,
+    supplier_id,
+    supplier_name,
+    state,
+    CAST(taskDateISO8601 AS DATE),
+    unnest (rep_images).bucket,
+    unnest (rep_images).localUri,
+    unnest (rep_images).mimeType,
+    unnest (rep_images).region,
+    unnest (rep_images).key AS key,
+    unnest (rep_images).isUploaded,
+    -- Array is in the same order
+    -- Sometimes this is null, no reason seemingly
+    -- No impact on photo availablility
+    -- If it's nullable, there's no point, derive it from key
+    -- unnest (photos_from_rep) AS filename
+  FROM
+    task_raw r,
+  WHERE
+    r.rep_images IS NOT NULL
+    AND len (r.rep_images) > 0
+);
 
+CREATE
+OR REPLACE TABLE tmp AS (
+  SELECT
+    *,
+    COALESCE(
+      -- Legacy Timestamp
+      TO_TIMESTAMP (
+        TRY_CAST (
+          NULLIF(regexp_extract (key, '(\d{13})\.jpg$', 1), '') AS BIGINT
+        ) / 1000
+      ),
+      -- Newer Timestamp
+      STRPTIME (
+        regexp_extract (key, '(\d{8}-\d{6})\.jpg$', 1),
+        '%d%m%Y-%H%M%S'
+      )
+    ) AS photo_datetime
+  FROM
+    tmp
+);
+
+INSERT OR REPLACE INTO
+  task_rep_images
+SELECT
+  *
+FROM
+  tmp;
 
 -- Need a tmp table for JSON casting
-CREATE OR REPLACE TABLE tmp AS (
-SELECT
-  id,
-  cover_rep_first_name,
-  support_rep_last_name,
-  endDate,
-  retailer_name,
-  cannot_complete_reason,
-  -- Just use the value field
-  country,
-  -- Just use the value field
-  state,
-  logo_img,
-  cover_rep_last_name,
-  startDate,
-  SK,
-  supplier_name,
-  taskDate,
-  _lastChangedAt,
-  pause_task_reason,
-  store_id,
-  time_spent,
-  task_name,
-  comments_from_rep,
-  support_rep_first_name,
-  task_description,
-  delegated,
-  week_number,
-  cover_rep_type,
-  task_id,
-  senior_rep_first_name,
-  recurring,
-  full_company_name,
-  PK,
-  store_name,
-  support_rep_username,
-  task_type,
-  created_date,
-  week_startDate,
-  supplier_id,
-  stores.state AS store_state,
-  _version,
-  task_priority,
-  feedback_reassign,
-  task_approval,
-  taskDateISO8601,
-  cannot_complete_comments,
-  senior_rep_username,
-  record_time,
-  fine_line,
-  oneOff,
-  task_approval_notes,
-  visit_freq,
-  cover_rep_username,
-  task_status,
-  updatedAt,
-  recurringValue,
-  senior_rep_last_name,
-  push_task_comments,
-  solved,
-  delegated_to_sup_rep,
-  delegated_comments,
-FROM
-  task_raw);
+CREATE
+OR REPLACE TABLE tmp AS (
+  SELECT
+    id,
+    CAST(taskDateISO8601 AS DATE) AS taskDate,
+    CAST(updatedAt AS DATETIME),
+    startDate,
+    week_startDate,
+    endDate,
+    created_date,
+    cover_rep_first_name,
+    support_rep_last_name,
+    retailer_name,
+    cannot_complete_reason,
+    -- Just use the value field
+    country,
+    -- Just use the value field
+    state,
+    logo_img,
+    cover_rep_last_name,
+    SK,
+    supplier_name,
+    _lastChangedAt,
+    pause_task_reason,
+    store_id,
+    time_spent,
+    task_name,
+    comments_from_rep,
+    support_rep_first_name,
+    task_description,
+    delegated,
+    week_number,
+    cover_rep_type,
+    task_id,
+    senior_rep_first_name,
+    recurring,
+    full_company_name,
+    PK,
+    store_name,
+    support_rep_username,
+    task_type,
+    supplier_id,
+    stores.state AS store_state,
+    _version,
+    task_priority,
+    feedback_reassign,
+    task_approval,
+    cannot_complete_comments,
+    senior_rep_username,
+    record_time,
+    fine_line,
+    oneOff,
+    task_approval_notes,
+    visit_freq,
+    cover_rep_username,
+    task_status,
+    recurringValue,
+    senior_rep_last_name,
+    push_task_comments,
+    solved,
+    delegated_to_sup_rep,
+    delegated_comments,
+  FROM
+    task_raw
+);
 
 INSERT OR REPLACE INTO
   tasks
-SELECT * FROM tmp
+SELECT
+  *
+FROM
+  tmp;
+
+DROP TABLE tmp;

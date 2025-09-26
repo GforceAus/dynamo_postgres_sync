@@ -1,3 +1,5 @@
+-- TODO Cast dates
+-- D select CAST(taskDateISO8601 AS DATE), CAST(created_date AS DATETIME), CAST(updatedAt AS DATETIME) from task_raw;
 CREATE
 OR REPLACE TABLE task_documents (
   task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
@@ -25,8 +27,6 @@ OR REPLACE TABLE task_call_cycles (
 
 -- This would give 20 million rows
 -- SELECT id, call_id, unnest(storeList).store_id, unnest(storeList).store_name FROM (select unnest(callCycle, recursive := true), id from task_raw);
-
-
 CREATE
 OR REPLACE TABLE task_photos (
   task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
@@ -38,11 +38,18 @@ OR REPLACE TABLE task_photos (
   PRIMARY KEY (task_uuid),
 );
 
-CREATE OR REPLACE TABLE tasks (
+CREATE
+OR REPLACE TABLE tasks (
   id VARCHAR PRIMARY KEY,
+  -- Use the taskDateISO8601 value
+  taskDate DATE,
+  updatedAt VARCHAR,
+  startDate VARCHAR,
+  week_startDate VARCHAR,
+  endDate VARCHAR,
+  created_date VARCHAR,
   cover_rep_first_name VARCHAR,
   support_rep_last_name VARCHAR,
-  endDate VARCHAR,
   retailer_name VARCHAR,
   cannot_complete_reason VARCHAR,
   -- Just use the value field
@@ -51,10 +58,8 @@ CREATE OR REPLACE TABLE tasks (
   task_states JSON,
   logo_img VARCHAR,
   cover_rep_last_name VARCHAR,
-  startDate VARCHAR,
   SK VARCHAR,
   supplier_name VARCHAR,
-  taskDate VARCHAR,
   _lastChangedAt DOUBLE,
   pause_task_reason VARCHAR,
   store_id VARCHAR,
@@ -74,15 +79,12 @@ CREATE OR REPLACE TABLE tasks (
   store_name VARCHAR,
   support_rep_username VARCHAR,
   task_type VARCHAR,
-  created_date VARCHAR,
-  week_startDate VARCHAR,
   supplier_id VARCHAR,
   store_state VARCHAR,
   _version DOUBLE,
   task_priority VARCHAR,
   feedback_reassign VARCHAR,
   task_approval VARCHAR,
-  taskDateISO8601 DATE,
   cannot_complete_comments VARCHAR,
   senior_rep_username VARCHAR,
   record_time VARCHAR,
@@ -92,7 +94,6 @@ CREATE OR REPLACE TABLE tasks (
   visit_freq VARCHAR,
   cover_rep_username VARCHAR,
   task_status VARCHAR,
-  updatedAt VARCHAR,
   recurringValue VARCHAR,
   senior_rep_last_name VARCHAR,
   push_task_comments VARCHAR,
@@ -134,12 +135,14 @@ OR REPLACE TABLE task_rep_images (
   supplier_id VARCHAR,
   supplier_name VARCHAR,
   state VARCHAR,
+  task_date DATE,
   bucket VARCHAR,
   localUri VARCHAR,
   mimeType VARCHAR,
   region VARCHAR,
   "key" VARCHAR,
   isUploaded VARCHAR,
+  photo_datetime DATETIME,
   -- task_raw.photos_from_rep
   -- filename VARCHAR,
   PRIMARY KEY (task_uuid, key)
