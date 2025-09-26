@@ -54,3 +54,37 @@ FROM
 WHERE
   task_photos IS NOT NULL
   AND len (task_photos) > 0;
+
+-- Insert into task_questions table
+INSERT OR REPLACE INTO
+  task_questions
+SELECT
+  id AS task_uuid,
+  unnest (questions).question,
+  unnest (questions).client_shareable,
+  unnest (questions).Answers,
+  unnest (questions).additionShareable,
+  unnest (questions).question_shareable,
+  unnest (questions).answer_from_rep
+FROM
+  task_raw
+WHERE
+  questions IS NOT NULL
+  AND len (questions) > 0;
+
+-- Insert into task_rep_images_cannot_complete table
+INSERT OR REPLACE INTO
+  task_rep_images_cannot_complete
+SELECT
+  id AS task_uuid,
+  unnest (rep_images_cannot_complete).bucket,
+  unnest (rep_images_cannot_complete).localUri,
+  unnest (rep_images_cannot_complete).mimeType,
+  unnest (rep_images_cannot_complete).region,
+  unnest (rep_images_cannot_complete).key,
+  unnest (rep_images_cannot_complete).isUploaded
+FROM
+  task_raw
+WHERE
+  rep_images_cannot_complete IS NOT NULL
+  AND len (rep_images_cannot_complete) > 0;
