@@ -1,4 +1,4 @@
-
+set dotenv-load
 
 # Extract the data from Dynamo DB into files
 extract:
@@ -13,6 +13,8 @@ load:
     uv run -- python main.py load
 
 
+duckdb:
+    duckdb ./data/all.duckdb -cmd "INSTALL postgres; LOAD postgres; ATTACH '' AS postgres_db (TYPE postgres);"
 
 
 
