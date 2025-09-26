@@ -1,0 +1,40 @@
+#+title: Dynamo Sync Tool
+
+* Introduction
+* Dev Log
+** Table Indices
+See [[file:indexes.org]].
+** Table Schema
+The =justfile= uses the =datamodel= tool, by =pydantic=, to generate schema's:
+
+#+begin_src just
+############################################################
+## Get Schemas #############################################
+############################################################
+# Generate schema for Tasks
+schema-tasks:
+    uv run --with datamodel-code-generator \
+        datamodel-codegen \
+        --input fixtures/tasks/1.json \
+        --input-file-type json \
+        --output tasks.py
+
+# Generate schema for stores
+schema-stores:
+    uv run --with datamodel-code-generator \
+        datamodel-codegen \
+        --input fixtures/stores/1.json \
+        --input-file-type json \
+        --output stores.py
+
+# Generate schema for call cycles
+schema-call-cycles:
+    uv run --with datamodel-code-generator \
+        datamodel-codegen \
+        --input fixtures/call_cycles/1.json \
+        --input-file-type json \
+        --output call_cycles.py
+
+# Generate all schemas
+schema-all: schema-tasks schema-stores schema-call-cycles
+#+end_src
