@@ -1,7 +1,7 @@
 import os
 import typer
 from dotenv import load_dotenv
-from dynamo_utils import print_table_indexes, dump_table_data, save_table_data
+from dynamo_utils import print_table_indexes, dump_table_data, save_table_data, run_sql_transforms
 
 load_dotenv()
 
@@ -9,6 +9,7 @@ app = typer.Typer()
 
 # Directory constants
 RAW_DATA_DIR = "data/raw"
+DUCKDB_PATH = "data/all.duckdb"
 
 TABLE_DYNAMO_TASKS = "GforceTasks-notow4pikzczbpjg42gytvbuci-production"
 TABLE_DYNAMO_STORE = "GforceStore-notow4pikzczbpjg42gytvbuci-production"
@@ -30,7 +31,7 @@ def extract():
 @app.command()
 def transform():
     """Transform the extracted data."""
-    print("Transforming data...")
+    run_sql_transforms(raw_data_dir=RAW_DATA_DIR, duckdb_path=DUCKDB_PATH)
 
 
 @app.command()

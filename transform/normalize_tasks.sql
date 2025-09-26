@@ -12,7 +12,7 @@ SELECT
   unnest (documentAdd).mimeType,
   unnest (documentAdd).key
 FROM
-  task_raw
+  tasks_raw
 WHERE
   documentAdd IS NOT NULL
   AND len (documentAdd) > 0;
@@ -27,9 +27,9 @@ OR REPLACE TABLE tmp AS (
     unnest (callCycle).call_status AS call_status,
     unnest (callCycle).retailer AS retailer,
     unnest (callCycle).call_id AS call_id,
-    unnest (callCycle).storeList AS storeList,
+    unnest (callCycle).storeList AS storeList
   FROM
-    task_raw
+    tasks_raw
   WHERE
     callCycle IS NOT NULL
     AND len (callCycle) > 0
@@ -53,7 +53,7 @@ SELECT
   unnest (task_photos).photo_name,
   unnest (task_photos).task_photos_notes
 FROM
-  task_raw
+  tasks_raw
 WHERE
   task_photos IS NOT NULL
   AND len (task_photos) > 0;
@@ -70,7 +70,7 @@ SELECT
   unnest (questions).question_shareable,
   unnest (questions).answer_from_rep
 FROM
-  task_raw
+  tasks_raw
 WHERE
   questions IS NOT NULL
   AND len (questions) > 0;
@@ -87,7 +87,7 @@ SELECT
   unnest (rep_images_cannot_complete).key,
   unnest (rep_images_cannot_complete).isUploaded
 FROM
-  task_raw
+  tasks_raw
 WHERE
   rep_images_cannot_complete IS NOT NULL
   AND len (rep_images_cannot_complete) > 0;
@@ -102,7 +102,7 @@ SELECT
   unnest (task_comments).task_comments_notes,
   unnest (task_comments).client_comments_shareable
 FROM
-  task_raw
+  tasks_raw
 WHERE
   task_comments IS NOT NULL
   AND len (task_comments) > 0;
@@ -131,7 +131,7 @@ or REPLACE TABLE tmp AS (
     -- If it's nullable, there's no point, derive it from key
     -- unnest (photos_from_rep) AS filename
   FROM
-    task_raw r,
+    tasks_raw r
   WHERE
     r.rep_images IS NOT NULL
     AND len (r.rep_images) > 0
@@ -208,7 +208,7 @@ OR REPLACE TABLE tmp AS (
     support_rep_username,
     task_type,
     supplier_id,
-    stores.state AS store_state,
+    state AS store_state,
     _version,
     task_priority,
     feedback_reassign,
@@ -227,9 +227,9 @@ OR REPLACE TABLE tmp AS (
     push_task_comments,
     solved,
     delegated_to_sup_rep,
-    delegated_comments,
+    delegated_comments
   FROM
-    task_raw
+    tasks_raw
 );
 
 INSERT OR REPLACE INTO

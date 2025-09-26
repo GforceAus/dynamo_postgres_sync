@@ -1,4 +1,4 @@
--- Transform call_cycle_raw data into normalized tables
+-- Transform call_cycles_raw data into normalized tables
 
 -- Insert into call_cycle_stores table
 INSERT OR REPLACE INTO call_cycle_stores
@@ -15,7 +15,7 @@ SELECT
   unnest(stores).value,
   unnest(stores).frequency,
   unnest(stores).supplier
-FROM call_cycle_raw
+FROM call_cycles_raw
 WHERE stores IS NOT NULL
   AND len(stores) > 0;
 
@@ -41,4 +41,4 @@ SELECT
   updatedAt,
   supplier_username,
   supplier_name
-FROM call_cycle_raw;
+FROM call_cycles_raw;
