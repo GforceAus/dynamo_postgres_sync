@@ -1,5 +1,6 @@
-CREATE TABLE stores (
-  id VARCHAR,
+CREATE
+OR REPLACE TABLE stores (
+  id VARCHAR PRIMARY KEY,
   store_manager VARCHAR,
   support_rep_username VARCHAR,
   retailer_name VARCHAR,
@@ -31,26 +32,48 @@ CREATE TABLE stores (
   sales_rep_username VARCHAR
 );
 
-CREATE TABLE store_visit_days (store_id VARCHAR, name VARCHAR, checked BOOLEAN);
+CREATE
+OR REPLACE TABLE store_visit_days (
+  store_id VARCHAR,
+  name VARCHAR,
+  checked BOOLEAN,
+  PRIMARY KEY (store_id, name)
+);
 
-CREATE TABLE store_additional_reps (
+CREATE
+OR REPLACE TABLE store_additional_reps (
   store_id VARCHAR,
   rep_cover VARCHAR,
   last_name VARCHAR,
   from_date VARCHAR,
   to_date VARCHAR,
   rep_cover_username VARCHAR,
-  first_name VARCHAR
+  first_name VARCHAR,
+  PRIMARY KEY (store_id, rep_cover_username)
 );
 
-CREATE TABLE store_contacts (
+CREATE
+OR REPLACE TABLE store_contacts (
   store_id VARCHAR,
   "name" VARCHAR,
   "position" VARCHAR,
   phone VARCHAR,
-  email VARCHAR
+  email VARCHAR,
+  PRIMARY KEY (store_id, email)
 );
 
-CREATE TABLE store_notes (store_id VARCHAR, datetime VARCHAR, notes VARCHAR);
+CREATE
+OR REPLACE TABLE store_notes (
+  store_id VARCHAR,
+  datetime VARCHAR,
+  notes VARCHAR,
+  PRIMARY KEY (store_id, datetime)
+);
 
-CREATE TABLE store_sales_rep_notes (store_id VARCHAR, datetime VARCHAR, notes VARCHAR);
+CREATE
+OR REPLACE TABLE store_sales_rep_notes (
+  store_id VARCHAR,
+  datetime VARCHAR,
+  notes VARCHAR,
+  PRIMARY KEY (store_id, datetime)
+);
