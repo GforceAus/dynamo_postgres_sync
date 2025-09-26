@@ -9,8 +9,8 @@ transform:
     uv run -- python main.py transform
 
 # Load the data into Postgresql
-transform:
-    uv run -- python main.py transform
+load:
+    uv run -- python main.py load
 
 
 
@@ -24,6 +24,7 @@ transform:
 ############################################################
 # Generate schema for Tasks
 schema-tasks:
+    mkdir -p models && \
     uv run --with datamodel-code-generator \
         datamodel-codegen \
         --input fixtures/tasks/1.json \
@@ -32,6 +33,7 @@ schema-tasks:
 
 # Generate schema for stores
 schema-stores:
+    mkdir -p models && \
     uv run --with datamodel-code-generator \
         datamodel-codegen \
         --input fixtures/stores/1.json \
@@ -40,6 +42,7 @@ schema-stores:
 
 # Generate schema for call cycles
 schema-call-cycles:
+    mkdir -p models && \
     uv run --with datamodel-code-generator \
         datamodel-codegen \
         --input fixtures/call_cycles/1.json \
