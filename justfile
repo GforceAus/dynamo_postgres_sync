@@ -21,7 +21,8 @@ pg_schema:
     pg_dump  -t tasks           --schema-only -d $PGDATABASE
     pg_dump  -t task_questions  --schema-only -d $PGDATABASE
 
-
+docker_run:
+  docker-compose run --rm dynamo-sync python main.py etl
 
 
 
