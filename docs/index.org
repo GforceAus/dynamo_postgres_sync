@@ -11,30 +11,64 @@ The =justfile= uses the =datamodel= tool, by =pydantic=, to generate schema's:
 ############################################################
 ## Get Schemas #############################################
 ############################################################
-# Generate schema for Tasks
+# Generate schema for Tasks (42 Seconds on Vale)
 schema-tasks:
+    mkdir -p models && \
     uv run --with datamodel-code-generator \
         datamodel-codegen \
-        --input fixtures/tasks/1.json \
+        --input ./data/raw/GforceTasks-notow4pikzczbpjg42gytvbuci-production.json \
         --input-file-type json \
-        --output tasks.py
+        --output models/tasks.py
 
 # Generate schema for stores
 schema-stores:
+    mkdir -p models && \
     uv run --with datamodel-code-generator \
         datamodel-codegen \
-        --input fixtures/stores/1.json \
+        --input ./data/raw/GforceCallCycle-notow4pikzczbpjg42gytvbuci-production.json \
         --input-file-type json \
-        --output stores.py
+        --output models/stores.py
 
 # Generate schema for call cycles
 schema-call-cycles:
+    mkdir -p models && \
     uv run --with datamodel-code-generator \
         datamodel-codegen \
-        --input fixtures/call_cycles/1.json \
+        --input ./data/raw/GforceStore-notow4pikzczbpjg42gytvbuci-production.json \
         --input-file-type json \
-        --output call_cycles.py
+        --output models/call_cycles.py
 
 # Generate all schemas
 schema-all: schema-tasks schema-stores schema-call-cycles
 #+end_src
+** Extract
+The =extract= command downloads all data from Dynamo DB as a json file. It takes 10 minutes for 100k tasks. There is 90K tasks as of [2025-09-26 Fri] which is 300 MB. This assumes the data will fit in memory.
+** Transform
+*** Overview
+1. Create Classes using =datamodel-code-generator.datemodel-codegen=
+2. Create a DuckDB Table for each class:
+   #+begin_src python
+import pyarrow as pa
+import duckdb
+
+# Convert to a PyArrow Table
+arrays = [
+    pa.array([d.id for d in data]),
+    pa.array([d.name for d in data]),
+    pa.array([d.age for d in data])
+]
+batch = pa.RecordBatch.from_arrays(arrays, names=['id', 'name', 'age'])
+
+# Creating a DuckDB table
+con = duckdb.connect(database=':memory:')
+con.execute("CREATE TABLE my_data AS SELECT * FROM batch")
+
+# Verify table creation
+print(con.execute("SELECT * FROM my_data").fetchall())
+   #+end_src
+3. Print the Schema
+   #+begin_src sql
+.schema {table}
+   #+end_src
+4. Load the Data into a =_raw= table
+5. Normalize into new tables
