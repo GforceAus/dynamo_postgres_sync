@@ -71,4 +71,9 @@ print(con.execute("SELECT * FROM my_data").fetchall())
 .schema {table}
    #+end_src
 4. Load the Data into a =_raw= table
+   #+begin_src sql
+CREATE TABLE stores_raw AS (SELECT * FROM read_json_auto('./data/raw/GforceStore-notow4pikzczbpjg42gytvbuci-production.json'));
+CREATE TABLE task_raw AS (SELECT * FROM read_json_auto('./data/raw/GforceTasks-notow4pikzczbpjg42gytvbuci-production.json'));
+CREATE TABLE call_cycle_raw AS (SELECT * FROM read_json_auto('./data/raw/GforceCallCycle-notow4pikzczbpjg42gytvbuci-production.json'));
+   #+end_src
 5. Normalize into new tables
