@@ -19,17 +19,13 @@ OR REPLACE TABLE task_call_cycles (
   call_status VARCHAR,
   retailer VARCHAR,
   call_id VARCHAR,
+  storeList JSON,
   PRIMARY KEY (task_uuid, call_id)
 );
 
-CREATE
-OR REPLACE TABLE task_call_cycles_stores (
-  task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
-  call_id VARCHAR,
-  store_id VARCHAR,
-  store_name VARCHAR,
-  PRIMARY KEY (task_uuid, call_id, store_id)
-);
+-- This would give 20 million rows
+-- SELECT id, call_id, unnest(storeList).store_id, unnest(storeList).store_name FROM (select unnest(callCycle, recursive := true), id from task_raw);
+
 
 CREATE
 OR REPLACE TABLE task_photos (
