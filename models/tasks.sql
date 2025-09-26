@@ -5,7 +5,7 @@
 -- TODO Cast dates
 -- D select CAST(taskDateISO8601 AS DATE), CAST(created_date AS DATETIME), CAST(updatedAt AS DATETIME) from task_raw;
 CREATE
-OR REPLACE TABLE task_documents (
+TABLE IF NOT EXISTS task_documents (
   task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
   requiredDoc BOOLEAN,
   "document" VARCHAR,
@@ -19,7 +19,7 @@ OR REPLACE TABLE task_documents (
 );
 
 CREATE
-OR REPLACE TABLE task_call_cycles (
+TABLE IF NOT EXISTS task_call_cycles (
   task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
   call_cycle_name VARCHAR,
   call_status VARCHAR,
@@ -32,7 +32,7 @@ OR REPLACE TABLE task_call_cycles (
 -- This would give 20 million rows
 -- SELECT id, call_id, unnest(storeList).store_id, unnest(storeList).store_name FROM (select unnest(callCycle, recursive := true), id from task_raw);
 CREATE
-OR REPLACE TABLE task_photos (
+TABLE IF NOT EXISTS task_photos (
   task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
   task_id VARCHAR,
   client_photos_shareable VARCHAR,
@@ -43,7 +43,7 @@ OR REPLACE TABLE task_photos (
 );
 
 CREATE
-OR REPLACE TABLE tasks (
+TABLE IF NOT EXISTS tasks (
   id VARCHAR PRIMARY KEY,
   -- Use the taskDateISO8601 value
   taskDate DATE,
@@ -107,7 +107,7 @@ OR REPLACE TABLE tasks (
 );
 
 CREATE
-OR REPLACE TABLE task_questions (
+TABLE IF NOT EXISTS task_questions (
   task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
   question VARCHAR,
   client_shareable VARCHAR,
@@ -119,7 +119,7 @@ OR REPLACE TABLE task_questions (
 );
 
 CREATE
-OR REPLACE TABLE task_rep_images_cannot_complete (
+TABLE IF NOT EXISTS task_rep_images_cannot_complete (
   task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
   bucket VARCHAR,
   localUri VARCHAR,
@@ -131,7 +131,7 @@ OR REPLACE TABLE task_rep_images_cannot_complete (
 );
 
 CREATE
-OR REPLACE TABLE task_rep_images (
+TABLE IF NOT EXISTS task_rep_images (
   task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
   task_id VARCHAR,
   store_id VARCHAR,
@@ -153,7 +153,7 @@ OR REPLACE TABLE task_rep_images (
 );
 
 CREATE
-OR REPLACE TABLE task_comments (
+TABLE IF NOT EXISTS task_comments (
   task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
   task_id VARCHAR,
   "comment" VARCHAR,

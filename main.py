@@ -49,21 +49,6 @@ def load():
     conn.execute("LOAD postgres")
     conn.execute("ATTACH '' AS postgres_db (TYPE postgres)")
 
-    # Set primary key for tables that will be appended
-    for table, keys in [
-            ("task_rep_images", "task_uuid, key"),
-            ("tasks", "id"),
-            ("task_questions", "task_uuid, question")
-            ]:
-
-        try:
-            stmt = f"CREATE TABLE IF NOT EXISTS postgres_db.{table} AS (SELECT * FROM {table} LIMIT 0);"
-            stmt += f"CALL postgres_execute('postgres_db', 'ALTER TABLE {table} ADD PRIMARY KEY ({keys})');"
-            stmt += "CALL pg_clear_cache();"
-            conn.execute(stmt)
-        except Exception:
-            pass
-
     try:
         # Execute load SQL file
         load_sql_path = "load/load_tables.sql"

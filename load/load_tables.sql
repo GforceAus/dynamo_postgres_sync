@@ -43,27 +43,14 @@ CALL postgres_execute('postgres_db', 'ALTER TABLE task_comments ADD PRIMARY KEY 
 CALL pg_clear_cache();
 
 -- These are appended for archival purposes (just in case they're dropped upstream)
--- CREATE OR REPLACE TABLE postgres_db.task_questions                  AS (SELECT * FROM task_questions);
--- CREATE OR REPLACE TABLE postgres_db.task_rep_images                 AS (SELECT * FROM task_rep_images);
--- CREATE OR REPLACE TABLE postgres_db.tasks                           AS (SELECT * FROM tasks);
+CREATE OR REPLACE TABLE postgres_db.task_questions                  AS (SELECT * FROM task_questions);
+CREATE OR REPLACE TABLE postgres_db.task_rep_images                 AS (SELECT * FROM task_rep_images);
+CREATE OR REPLACE TABLE postgres_db.tasks                           AS (SELECT * FROM tasks);
 
-----------------------------------------
--- Appending ---------------------------
-----------------------------------------
+CALL postgres_execute('postgres_db', 'ALTER TABLE tasks ADD PRIMARY KEY (id)');
+CALL postgres_execute('postgres_db', 'ALTER TABLE task_rep_images ADD PRIMARY KEY (task_uuid, key)');
+CALL postgres_execute('postgres_db', 'ALTER TABLE task_questions ADD PRIMARY KEY (task_uuid, question)');
 
--- NOTE, sometimes INSERT OR REPLACE complains about Primary Keys
--- If you're debugging this and found this comment, just use CREATE OR REPLACE TABLE for now
--- the Dynamo DB is the master anyway
--- It may be possible to delete what we have locally, but you'd have to use IN with a tuple.
-
--- Append the images
-INSERT OR REPLACE INTO  postgres_db.task_rep_images (SELECT * FROM task_rep_images);
-
--- Append the tasks
--- Cannot use INSERT OR REPLACE INTO so we DELETE what we have here
-DELETE FROM postgres_db.tasks WHERE id IN (SELECT id FROM tasks);
-INSERT INTO  postgres_db.tasks (SELECT * FROM tasks);
-
-INSERT OR REPLACE INTO  postgres_db.task_questions (SELECT * FROM task_questions);
-
-
+-- Create indexes
+CALL postgres_execute('postgres_db', 'CREATE INDEX idx_task_rep_images_photo_datetime ON task_rep_images (photo_datetime)');
+CALL postgres_execute('postgres_db', 'CREATE INDEX idx_tasks_supplier_id ON tasks (supplier_id)');
