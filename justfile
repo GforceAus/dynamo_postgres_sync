@@ -22,32 +22,32 @@ load:
 ############################################################
 ## Get Schemas #############################################
 ############################################################
-# Generate schema for Tasks
+# Generate schema for Tasks (42 Seconds on Vale)
 schema-tasks:
     mkdir -p models && \
     uv run --with datamodel-code-generator \
         datamodel-codegen \
-        --input fixtures/tasks/1.json \
+        --input ./data/raw/GforceTasks-notow4pikzczbpjg42gytvbuci-production.json \
         --input-file-type json \
-        --output tasks.py
+        --output models/tasks.py
 
 # Generate schema for stores
 schema-stores:
     mkdir -p models && \
     uv run --with datamodel-code-generator \
         datamodel-codegen \
-        --input fixtures/stores/1.json \
+        --input ./data/raw/GforceCallCycle-notow4pikzczbpjg42gytvbuci-production.json \
         --input-file-type json \
-        --output stores.py
+        --output models/stores.py
 
 # Generate schema for call cycles
 schema-call-cycles:
     mkdir -p models && \
     uv run --with datamodel-code-generator \
         datamodel-codegen \
-        --input fixtures/call_cycles/1.json \
+        --input ./data/raw/GforceStore-notow4pikzczbpjg42gytvbuci-production.json \
         --input-file-type json \
-        --output call_cycles.py
+        --output models/call_cycles.py
 
 # Generate all schemas
 schema-all: schema-tasks schema-stores schema-call-cycles
