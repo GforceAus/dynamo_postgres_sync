@@ -88,7 +88,6 @@ CREATE TABLE tasks (
   taskDateISO8601 DATE,
   cannot_complete_comments VARCHAR,
   senior_rep_username VARCHAR,
-  "action" JSON,
   record_time VARCHAR,
   fine_line VARCHAR,
   oneOff BOOLEAN,
