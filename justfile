@@ -24,6 +24,22 @@ pg_schema:
 docker_run:
   docker-compose run --rm dynamo-sync python main.py etl
 
+# Use AWS CLI to dump DynamoDB tables
+aws_extract:
+    mkdir -p data/raw && \
+    aws dynamodb scan \
+        --table-name GforceTasks-notow4pikzczbpjg42gytvbuci-production \
+        --region ap-southeast-2 \
+        --output json > data/raw/GforceTasks-aws.json && \
+    aws dynamodb scan \
+        --table-name GforceStore-notow4pikzczbpjg42gytvbuci-production \
+        --region ap-southeast-2 \
+        --output json > data/raw/GforceStore-aws.json && \
+    aws dynamodb scan \
+        --table-name GforceCallCycle-notow4pikzczbpjg42gytvbuci-production \
+        --region ap-southeast-2 \
+        --output json > data/raw/GforceCallCycle-aws.json
+
 
 
 
