@@ -1,3 +1,7 @@
+
+
+
+
 -- TODO Cast dates
 -- D select CAST(taskDateISO8601 AS DATE), CAST(created_date AS DATETIME), CAST(updatedAt AS DATETIME) from task_raw;
 CREATE
@@ -43,11 +47,11 @@ OR REPLACE TABLE tasks (
   id VARCHAR PRIMARY KEY,
   -- Use the taskDateISO8601 value
   taskDate DATE,
-  updatedAt VARCHAR,
-  startDate VARCHAR,
-  week_startDate VARCHAR,
-  endDate VARCHAR,
-  created_date VARCHAR,
+  updatedAt DATETIME,
+  startDate DATETIME,
+  week_startDate DATE,
+  endDate DATETIME,
+  created_date DATETIME,
   cover_rep_first_name VARCHAR,
   support_rep_last_name VARCHAR,
   retailer_name VARCHAR,
