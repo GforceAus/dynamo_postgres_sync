@@ -38,7 +38,7 @@ OR REPLACE TABLE task_photos (
   PRIMARY KEY (task_uuid),
 );
 
-CREATE TABLE tasks (
+CREATE OR REPLACE TABLE tasks (
   id VARCHAR PRIMARY KEY,
   cover_rep_first_name VARCHAR,
   support_rep_last_name VARCHAR,
@@ -46,9 +46,9 @@ CREATE TABLE tasks (
   retailer_name VARCHAR,
   cannot_complete_reason VARCHAR,
   -- Just use the value field
-  country VARCHAR,
+  task_countries JSON,
   -- Just use the value field
-  state VARCHAR,
+  task_states JSON,
   logo_img VARCHAR,
   cover_rep_last_name VARCHAR,
   startDate VARCHAR,
@@ -77,9 +77,6 @@ CREATE TABLE tasks (
   created_date VARCHAR,
   week_startDate VARCHAR,
   supplier_id VARCHAR,
-  -- Checked is always true, so we always include the store_id and store_name,
-  store_id VARCHAR,
-  store_name VARCHAR,
   store_state VARCHAR,
   _version DOUBLE,
   task_priority VARCHAR,

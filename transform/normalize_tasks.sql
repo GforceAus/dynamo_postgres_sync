@@ -115,5 +115,91 @@ FROM
   task_raw r,
 WHERE
   r.rep_images IS NOT NULL
-  AND len (r.rep_images) > 0
+  AND len (r.rep_images) > 0;
 
+-- Insert into task_comments table
+INSERT OR REPLACE INTO
+  task_comments
+SELECT
+  id AS task_uuid,
+  unnest (task_comments).task_id,
+  unnest (task_comments).comment,
+  unnest (task_comments).task_comments_notes,
+  unnest (task_comments).client_comments_shareable
+FROM
+  task_raw
+WHERE
+  task_comments IS NOT NULL
+  AND len (task_comments) > 0;
+
+
+
+-- Need a tmp table for JSON casting
+CREATE OR REPLACE TABLE tmp AS (
+SELECT
+  id,
+  cover_rep_first_name,
+  support_rep_last_name,
+  endDate,
+  retailer_name,
+  cannot_complete_reason,
+  -- Just use the value field
+  country,
+  -- Just use the value field
+  state,
+  logo_img,
+  cover_rep_last_name,
+  startDate,
+  SK,
+  supplier_name,
+  taskDate,
+  _lastChangedAt,
+  pause_task_reason,
+  store_id,
+  time_spent,
+  task_name,
+  comments_from_rep,
+  support_rep_first_name,
+  task_description,
+  delegated,
+  week_number,
+  cover_rep_type,
+  task_id,
+  senior_rep_first_name,
+  recurring,
+  full_company_name,
+  PK,
+  store_name,
+  support_rep_username,
+  task_type,
+  created_date,
+  week_startDate,
+  supplier_id,
+  stores.state AS store_state,
+  _version,
+  task_priority,
+  feedback_reassign,
+  task_approval,
+  taskDateISO8601,
+  cannot_complete_comments,
+  senior_rep_username,
+  record_time,
+  fine_line,
+  oneOff,
+  task_approval_notes,
+  visit_freq,
+  cover_rep_username,
+  task_status,
+  updatedAt,
+  recurringValue,
+  senior_rep_last_name,
+  push_task_comments,
+  solved,
+  delegated_to_sup_rep,
+  delegated_comments,
+FROM
+  task_raw);
+
+INSERT OR REPLACE INTO
+  tasks
+SELECT * FROM tmp
