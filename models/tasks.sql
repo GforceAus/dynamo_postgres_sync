@@ -1,43 +1,46 @@
-CREATE OR REPLACE TABLE task_documents (
-    task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
-    requiredDoc BOOLEAN,
-    "document" VARCHAR,
-    notes VARCHAR,
-    uploaded BOOLEAN,
-    signed BOOLEAN,
-    localUri VARCHAR,
-    mimeType VARCHAR,
-    "key" VARCHAR,
-    PRIMARY KEY (task_uuid, document)
+CREATE
+OR REPLACE TABLE task_documents (
+  task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
+  requiredDoc BOOLEAN,
+  "document" VARCHAR,
+  notes VARCHAR,
+  uploaded BOOLEAN,
+  signed BOOLEAN,
+  localUri VARCHAR,
+  mimeType VARCHAR,
+  "key" VARCHAR,
+  PRIMARY KEY (task_uuid, document)
 );
 
-CREATE OR REPLACE TABLE task_call_cycles (
-    task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
-    call_cycle_name VARCHAR,
-    call_status VARCHAR,
-    retailer VARCHAR,
-    call_id VARCHAR,
-    PRIMARY KEY (task_uuid, call_id)
+CREATE
+OR REPLACE TABLE task_call_cycles (
+  task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
+  call_cycle_name VARCHAR,
+  call_status VARCHAR,
+  retailer VARCHAR,
+  call_id VARCHAR,
+  PRIMARY KEY (task_uuid, call_id)
 );
 
-CREATE OR REPLACE TABLE task_call_cycles_stores (
-    task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
-    call_id VARCHAR,
-    store_id VARCHAR,
-    store_name VARCHAR,
-    PRIMARY KEY (task_uuid, call_id, store_id)
+CREATE
+OR REPLACE TABLE task_call_cycles_stores (
+  task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
+  call_id VARCHAR,
+  store_id VARCHAR,
+  store_name VARCHAR,
+  PRIMARY KEY (task_uuid, call_id, store_id)
 );
 
-CREATE OR REPLACE TABLE task_photos (
-    task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
-    task_id VARCHAR,
-    client_photos_shareable VARCHAR,
-    photo_name VARCHAR,
-    task_photos_notes VARCHAR,
-    -- Only task_UUID is a primary key as the task_photos field is ALWAYS exactly 1
-    PRIMARY KEY (task_uuid),
+CREATE
+OR REPLACE TABLE task_photos (
+  task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
+  task_id VARCHAR,
+  client_photos_shareable VARCHAR,
+  photo_name VARCHAR,
+  task_photos_notes VARCHAR,
+  -- Only task_UUID is a primary key as the task_photos field is ALWAYS exactly 1
+  PRIMARY KEY (task_uuid),
 );
-
 
 CREATE TABLE tasks (
   id VARCHAR PRIMARY KEY,
@@ -106,54 +109,56 @@ CREATE TABLE tasks (
   delegated_comments VARCHAR
 );
 
-
-CREATE OR REPLACE TABLE task_questions (
-    task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
-    question VARCHAR,
-    client_shareable VARCHAR,
-    Answers VARCHAR [],
-    additionShareable VARCHAR,
-    question_shareable BOOLEAN,
-    answer_from_rep VARCHAR,
-    PRIMARY KEY (task_uuid, question)
+CREATE
+OR REPLACE TABLE task_questions (
+  task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
+  question VARCHAR,
+  client_shareable VARCHAR,
+  Answers VARCHAR [],
+  additionShareable VARCHAR,
+  question_shareable BOOLEAN,
+  answer_from_rep VARCHAR,
+  PRIMARY KEY (task_uuid, question)
 );
 
-
-CREATE OR REPLACE TABLE task_rep_images_cannot_complete (
-    task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
-    bucket VARCHAR,
-    localUri VARCHAR,
-    mimeType VARCHAR,
-    region VARCHAR,
-    "key" VARCHAR,
-    isUploaded VARCHAR,
-    PRIMARY KEY (task_uuid, key)
+CREATE
+OR REPLACE TABLE task_rep_images_cannot_complete (
+  task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
+  bucket VARCHAR,
+  localUri VARCHAR,
+  mimeType VARCHAR,
+  region VARCHAR,
+  "key" VARCHAR,
+  isUploaded VARCHAR,
+  PRIMARY KEY (task_uuid, key)
 );
 
-CREATE OR REPLACE TABLE task_rep_images (
-    task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
-    task_id VARCHAR,
-    store_id VARCHAR,
-    store_name VARCHAR,
-    supplier_id VARCHAR,
-    supplier_name VARCHAR,
-    state VARCHAR,
-    bucket VARCHAR,
-    localUri VARCHAR,
-    mimeType VARCHAR,
-    region VARCHAR,
-    "key" VARCHAR,
-    isUploaded VARCHAR,
-    -- task_raw.photos_from_rep
-    filename VARCHAR,
-    PRIMARY KEY (task_uuid, key)
+CREATE
+OR REPLACE TABLE task_rep_images (
+  task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
+  task_id VARCHAR,
+  store_id VARCHAR,
+  store_name VARCHAR,
+  supplier_id VARCHAR,
+  supplier_name VARCHAR,
+  state VARCHAR,
+  bucket VARCHAR,
+  localUri VARCHAR,
+  mimeType VARCHAR,
+  region VARCHAR,
+  "key" VARCHAR,
+  isUploaded VARCHAR,
+  -- task_raw.photos_from_rep
+  filename VARCHAR,
+  PRIMARY KEY (task_uuid, key)
 );
 
-CREATE OR REPLACE TABLE task_comments (
-    task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
-    task_id VARCHAR,
-    "comment" VARCHAR,
-    task_comments_notes VARCHAR,
-    client_comments_shareable VARCHAR,
-    PRIMARY KEY (task_uuid, comment)
+CREATE
+OR REPLACE TABLE task_comments (
+  task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
+  task_id VARCHAR,
+  "comment" VARCHAR,
+  task_comments_notes VARCHAR,
+  client_comments_shareable VARCHAR,
+  PRIMARY KEY (task_uuid, comment)
 );
