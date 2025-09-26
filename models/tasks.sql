@@ -156,4 +156,4 @@ CREATE OR REPLACE TABLE task_comments (
     task_comments_notes VARCHAR,
     client_comments_shareable VARCHAR,
     PRIMARY KEY (task_uuid, comment)
-)
+);
