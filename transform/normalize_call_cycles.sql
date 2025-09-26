@@ -32,17 +32,9 @@ SELECT
   retailer,
   call_cycle_name,
   -- Extract first country value from array (assuming single value)
-  CASE
-    WHEN country IS NOT NULL AND len(country) > 0
-    THEN unnest(country).value
-    ELSE NULL
-  END as country,
-  -- Extract first state value from array (assuming single value)
-  CASE
-    WHEN state IS NOT NULL AND len(state) > 0
-    THEN unnest(state).value
-    ELSE NULL
-  END as state,
+  -- NOTE just use json here.
+  country,
+  state,
   _version,
   call_cycle_freq,
   start_date,

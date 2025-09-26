@@ -9,10 +9,8 @@ CREATE OR REPLACE TABLE call_cycles (
   createdAt VARCHAR,
   retailer VARCHAR,
   call_cycle_name VARCHAR,
-  -- Just use the value of the country, it's sufficiently obvious
-  country VARCHAR,
-  -- Just use the value of the state, it's sufficiently obvious
-  state VARCHAR,
+  country JSON,
+  state JSON,
   _version DOUBLE,
   call_cycle_freq VARCHAR,
   start_date VARCHAR,
