@@ -175,7 +175,7 @@ def load_json_data(conn, raw_data_dir: str):
 
         row_count = conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
         print(f"Loaded {row_count:,} rows from {json_file}")
-        
+
         # Create simplified aliases for transform queries
         if "GforceStore" in table_name:
             conn.execute(f"CREATE OR REPLACE VIEW stores_raw AS SELECT * FROM {table_name}")
@@ -187,7 +187,7 @@ def load_json_data(conn, raw_data_dir: str):
 
 def execute_sql_models(conn, models_dir: str, transform_dir: str = "transform"):
     """Execute SQL model files and transform files in order."""
-    
+
     # Run model files (create tables)
     model_files = ["stores.sql", "call_cycles.sql", "tasks.sql"]
     print("Creating tables...")
@@ -205,7 +205,7 @@ def execute_sql_models(conn, models_dir: str, transform_dir: str = "transform"):
     # Run transform files (normalize data)
     transform_files = [
         "normalize_stores.sql",
-        "normalize_call_cycles.sql", 
+        "normalize_call_cycles.sql",
         "normalize_tasks.sql",
     ]
     print("Normalizing data...")
@@ -230,23 +230,66 @@ def export_transformed_tables(conn, output_dir: str):
         table_name = table_row[0]
 
         # Skip raw data tables and views
-        if (not any(raw_table in table_name for raw_table in ["GforceTasks", "GforceStore", "GforceCallCycle"]) 
+        if (not any(raw_table in table_name for raw_table in ["GforceTasks", "GforceStore", "GforceCallCycle"])
             and not table_name.endswith("_raw")):
-            
+
             output_path = os.path.join(output_dir, f"{table_name}.parquet")
             conn.execute(f"COPY {table_name} TO '{output_path}' (FORMAT PARQUET)")
-            
+
             row_count = conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
             if row_count > 0:
                 exported_count += 1
                 print(f"Exported {table_name}: {row_count:,} rows")
-    
+
     print(f"Export completed: {exported_count} tables")
+
+
+def sync_tables_to_postgres(conn):
+    """
+    Sync DuckDB tables to PostgreSQL.
+
+    This is not used, instead I wrote ./load/load_tables.sql
+    because I wanted to append the tasks and photo table, just in case the data upstream was dropped.
+    """
+    tables = conn.execute("SHOW TABLES").fetchall()
+    synced_count = 0
+
+    print("Syncing tables to PostgreSQL...")
+    for table_row in tables:
+        table_name = table_row[0]
+
+        # Skip raw data tables, views, and temporary tables
+        if (not table_name.endswith("_raw")
+            and not any(raw_table in table_name for raw_table in ["GforceTasks", "GforceStore", "GforceCallCycle"])
+            and table_name != "tmp"):
+
+            try:
+                # Create table structure in PostgreSQL if it doesn't exist
+                conn.execute(f"""
+                    CREATE TABLE IF NOT EXISTS postgres_db.{table_name} AS
+                    (SELECT * FROM {table_name} LIMIT 0)
+                """)
+
+                # Replace table data in PostgreSQL
+                conn.execute(f"""
+                    CREATE OR REPLACE TABLE postgres_db.tmp AS
+                    (SELECT * FROM {table_name})
+                """)
+
+                row_count = conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
+                if row_count > 0:
+                    synced_count += 1
+                    print(f"Synced {table_name}: {row_count:,} rows")
+
+            except Exception as e:
+                print(f"Error syncing {table_name}: {e}")
+
+    print(f"Sync completed: {synced_count} tables")
 
 
 def run_sql_transforms(
     raw_data_dir: str = "data/raw",
-    models_dir: str = "models", 
+    models_dir: str = "models",
     output_dir: str | None = "data/transformed",
     duckdb_path: str = "data/all.duckdb",
 ):
@@ -262,6 +305,12 @@ def run_sql_transforms(
 
     # Connect to DuckDB
     conn = duckdb.connect(duckdb_path)
+
+    # Setup PostgreSQL connection
+    # Requires environment variables: PGPASSWORD, PGHOST, PGPORT, PGUSER, PGDATABASE
+    conn.execute("INSTALL postgres")
+    conn.execute("LOAD postgres")
+    conn.execute("ATTACH '' AS postgres_db (TYPE postgres)")
 
     try:
         load_json_data(conn, raw_data_dir)

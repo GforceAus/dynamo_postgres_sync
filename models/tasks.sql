@@ -35,7 +35,7 @@ OR REPLACE TABLE task_photos (
   photo_name VARCHAR,
   task_photos_notes VARCHAR,
   -- Only task_UUID is a primary key as the task_photos field is ALWAYS exactly 1
-  PRIMARY KEY (task_uuid),
+  PRIMARY KEY (task_uuid, photo_name),
 );
 
 CREATE
