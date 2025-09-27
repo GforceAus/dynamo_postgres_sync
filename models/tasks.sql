@@ -134,6 +134,7 @@ CREATE
 TABLE IF NOT EXISTS task_rep_images (
   task_uuid VARCHAR, --task_raw.id (disambiguate from task_id)
   task_id VARCHAR,
+  task_name VARCHAR,
   store_id VARCHAR,
   store_name VARCHAR,
   supplier_id VARCHAR,

@@ -113,6 +113,7 @@ or REPLACE TABLE tmp AS (
   SELECT
     id AS task_uuid,
     task_id,
+    task_name,
     store_id,
     store_name,
     supplier_id,
