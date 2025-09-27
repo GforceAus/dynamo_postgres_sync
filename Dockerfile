@@ -21,4 +21,4 @@ COPY . .
 RUN mkdir -p data/raw data/transformed
 
 # Set default command
-CMD ["python", "main.py", "--help"]
+CMD ["python", "main.py", "watch"]

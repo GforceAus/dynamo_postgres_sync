@@ -22,7 +22,7 @@ pg_schema:
     pg_dump  -t task_questions  --schema-only -d $PGDATABASE
 
 docker_run:
-  docker-compose run --rm dynamo-sync python main.py etl
+  docker-compose run --rm dynamo-sync python main.py watch
 
 # Use AWS CLI to dump DynamoDB tables
 aws_extract:

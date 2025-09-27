@@ -20,4 +20,4 @@ services:
       - ./.env:/app/.env:Z
     restart: unless-stopped
     working_dir: /app
-    command: python main.py --help
+    command: python main.py watch
