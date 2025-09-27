@@ -42,6 +42,10 @@ CALL postgres_execute('postgres_db', 'ALTER TABLE task_rep_images_cannot_complet
 CALL postgres_execute('postgres_db', 'ALTER TABLE task_comments ADD PRIMARY KEY (task_uuid, comment)');
 CALL pg_clear_cache();
 
+-- The Photo Downloader needs to access this table
+CALL postgres_execute('postgres_db', 'GRANT SELECT ON task_rep_images TO photo_downloader');
+
+
 -- These are appended for archival purposes (just in case they're dropped upstream)
 CREATE OR REPLACE TABLE postgres_db.task_questions                  AS (SELECT * FROM task_questions);
 CREATE OR REPLACE TABLE postgres_db.task_rep_images                 AS (SELECT * FROM task_rep_images);
