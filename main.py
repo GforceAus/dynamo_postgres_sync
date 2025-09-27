@@ -23,7 +23,7 @@ def extract():
     """Extract data from source."""
     for table_name in dynamo_tables:
         print(f"Extracting data from {table_name}...")
-        items = dump_table_data(table_name, max_workers=24)
+        items = dump_table_data(table_name, max_workers=2)
         output_file = f"{RAW_DATA_DIR}/{table_name}.json"
         save_table_data(table_name, items, output_file)
         print(f"Completed extraction for {table_name}\n")
