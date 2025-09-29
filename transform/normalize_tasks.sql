@@ -111,6 +111,7 @@ WHERE
 CREATE
 or REPLACE TABLE tmp AS (
   SELECT
+    DISTINCT ON (task_id, key)
     id AS task_uuid,
     task_id,
     task_name,
@@ -137,6 +138,42 @@ or REPLACE TABLE tmp AS (
     r.rep_images IS NOT NULL
     AND len (r.rep_images) > 0
 );
+
+ALTER TABLE tmp ADD PRIMARY KEY (task_id, key);
+
+
+-- This table needs to be included as well, GFM seems to download them
+-- Just copy the above query
+INSERT OR IGNORE INTO tmp (
+  SELECT
+    DISTINCT ON (task_id, key)
+    id AS task_uuid,
+    task_id,
+    task_name,
+    store_id,
+    store_name,
+    supplier_id,
+    supplier_name,
+    state,
+    CAST(taskDateISO8601 AS DATE),
+    unnest (rep_images_cannot_complete).bucket,
+    unnest (rep_images_cannot_complete).localUri,
+    unnest (rep_images_cannot_complete).mimeType,
+    unnest (rep_images_cannot_complete).region,
+    unnest (rep_images_cannot_complete).key AS key,
+    unnest (rep_images_cannot_complete).isUploaded,
+    -- Array is in the same order
+    -- Sometimes this is null, no reason seemingly
+    -- No impact on photo availablility
+    -- If it's nullable, there's no point, derive it from key
+    -- unnest (photos_from_rep) AS filename
+  FROM
+    tasks_raw r
+  WHERE
+    r.rep_images_cannot_complete IS NOT NULL
+    AND len (r.rep_images_cannot_complete) > 0
+  );
+
 
 CREATE
 OR REPLACE TABLE tmp AS (
