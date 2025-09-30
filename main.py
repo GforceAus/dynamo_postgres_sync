@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+import shutil
 from time import sleep
 import typer
 from dotenv import load_dotenv
@@ -9,18 +11,29 @@ load_dotenv()
 app = typer.Typer()
 
 # Directory constants
-RAW_DATA_DIR = "data/raw"
-DUCKDB_PATH = "data/all.duckdb"
+DATA_DIR = "data"
+DATA_DIR_BAK = f"{DATA_DIR}_bak"
+RAW_DATA_DIR = f"{DATA_DIR}/raw"
+DUCKDB_PATH = f"{DATA_DIR}/all.duckdb"
 
 TABLE_DYNAMO_TASKS = "GforceTasks-notow4pikzczbpjg42gytvbuci-production"
 TABLE_DYNAMO_STORE = "GforceStore-notow4pikzczbpjg42gytvbuci-production"
 TABLE_DYNAMO_CALLS = "GforceCallCycle-notow4pikzczbpjg42gytvbuci-production"
 dynamo_tables = [TABLE_DYNAMO_STORE, TABLE_DYNAMO_CALLS, TABLE_DYNAMO_TASKS]
 
+def cleanup():
+    try:
+        shutil.rmtree(DATA_DIR_BAK)
+        shutil.move(DATA_DIR, DATA_DIR_BAK)
+    except Exception:
+        pass # Could be initial run
+
 
 @app.command()
 def extract():
     """Extract data from source."""
+    # Remove any old data
+    cleanup()
     for table_name in dynamo_tables:
         print(f"Extracting data from {table_name}...")
         total_items = dump_table_data(table_name, max_workers=2)
