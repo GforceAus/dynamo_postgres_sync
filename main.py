@@ -28,8 +28,8 @@ dynamo_tables = [TABLE_DYNAMO_STORE, TABLE_DYNAMO_CALLS, TABLE_DYNAMO_TASKS]
 
 def cleanup():
     try:
-        shutil.rmtree(DATA_DIR_BAK)
-        shutil.move(DATA_DIR, DATA_DIR_BAK)
+        shutil.rmtree(Path(DATA_DIR_BAK))
+        shutil.move(Path(DATA_DIR_BAK), Path(DATA_DIR_BAK))
     except Exception:
         pass  # Could be initial run
 
