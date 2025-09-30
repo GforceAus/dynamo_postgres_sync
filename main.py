@@ -7,9 +7,7 @@ from dotenv import load_dotenv
 from dynamo_utils import (
     print_table_indexes,
     dump_table_data,
-    save_table_data,
     run_sql_transforms,
-    sync_tables_to_postgres,
 )
 
 load_dotenv()
