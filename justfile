@@ -16,6 +16,12 @@ load:
 duckdb:
     duckdb ./data/all.duckdb -cmd "INSTALL postgres; LOAD postgres; ATTACH '' AS postgres_db (TYPE postgres);"
 
+psql:
+    psql
+
+fish:
+    fish
+
 pg_schema:
     pg_dump  -t task_rep_images --schema-only -d $PGDATABASE
     pg_dump  -t tasks           --schema-only -d $PGDATABASE
@@ -76,3 +82,5 @@ schema-call-cycles:
 
 # Generate all schemas
 schema-all: schema-tasks schema-stores schema-call-cycles
+
+
