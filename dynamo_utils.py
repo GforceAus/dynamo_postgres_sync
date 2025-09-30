@@ -51,8 +51,13 @@ def print_table_indexes(table_names):
 
 
 def scan_table_segment(
-    table_name: str, segment: int, total_segments: int, batch_size: int, 
-    save_callback, batch_lock, shared_state
+    table_name: str,
+    segment: int,
+    total_segments: int,
+    batch_size: int,
+    save_callback,
+    batch_lock,
+    shared_state,
 ) -> int:
     """Scan a segment of a DynamoDB table and save batches immediately."""
     dynamodb = boto3.resource("dynamodb")
@@ -66,22 +71,24 @@ def scan_table_segment(
         while True:
             response = table.scan(**scan_kwargs)
             batch_items = response["Items"]
-            
+
             # Process items immediately and save batches as we go
             with batch_lock:
                 for item in batch_items:
-                    shared_state['current_batch'].append(item)
-                    shared_state['total_items'] += 1
+                    shared_state["current_batch"].append(item)
+                    shared_state["total_items"] += 1
                     segment_items += 1
-                    
-                    if len(shared_state['current_batch']) >= batch_size:
+
+                    if len(shared_state["current_batch"]) >= batch_size:
                         save_callback()
-            
+
             scan_count += 1
 
             # Progress indicator every 10 scans (roughly every 10MB of data)
             if scan_count % 10 == 0:
-                print(f"  Segment {segment}: {segment_items:,} items ({scan_count} scans)")
+                print(
+                    f"  Segment {segment}: {segment_items:,} items ({scan_count} scans)"
+                )
 
             if "LastEvaluatedKey" not in response:
                 break
@@ -95,36 +102,48 @@ def scan_table_segment(
 
 
 # TODO this should be 1000 ish, set to 10 for testing
-def dump_table_data(table_name: str, max_workers: int = 4, batch_size: int = 1000, output_dir: str = None) -> int:
+def dump_table_data(
+    table_name: str,
+    max_workers: int = 4,
+    batch_size: int = 1000,
+    output_dir: str = None,
+) -> int:
     """Efficiently dump all data from a DynamoDB table using parallel scanning and batch saving."""
     start_time = time.time()
-    print(f"Starting parallel scan of table: {table_name} ({max_workers} segments, batch size: {batch_size})")
+    print(
+        f"Starting parallel scan of table: {table_name} ({max_workers} segments, batch size: {batch_size})"
+    )
 
     # Use parallel scanning for better performance
     total_segments = max_workers
     completed_segments = 0
     batch_num = 0
     batch_lock = threading.Lock()
-    
+
     # Shared state for all segments
-    shared_state = {
-        'current_batch': [],
-        'total_items': 0
-    }
+    shared_state = {"current_batch": [], "total_items": 0}
 
     def save_current_batch():
         nonlocal batch_num
-        if shared_state['current_batch']:
-            save_table_data_batch(table_name, shared_state['current_batch'].copy(), batch_num, output_dir)
+        if shared_state["current_batch"]:
+            save_table_data_batch(
+                table_name, shared_state["current_batch"].copy(), batch_num, output_dir
+            )
             batch_num += 1
-            shared_state['current_batch'].clear()
+            shared_state["current_batch"].clear()
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         # Submit scan tasks for each segment
         future_to_segment = {
             executor.submit(
-                scan_table_segment, table_name, segment, total_segments, 
-                batch_size, save_current_batch, batch_lock, shared_state
+                scan_table_segment,
+                table_name,
+                segment,
+                total_segments,
+                batch_size,
+                save_current_batch,
+                batch_lock,
+                shared_state,
             ): segment
             for segment in range(total_segments)
         }
@@ -136,7 +155,9 @@ def dump_table_data(table_name: str, max_workers: int = 4, batch_size: int = 100
                 segment_items = future.result()
                 completed_segments += 1
                 elapsed = time.time() - start_time
-                items_per_sec = shared_state['total_items'] / elapsed if elapsed > 0 else 0
+                items_per_sec = (
+                    shared_state["total_items"] / elapsed if elapsed > 0 else 0
+                )
 
                 print(
                     f"✓ Segment {segment} complete: {segment_items:,} items | "
@@ -153,7 +174,7 @@ def dump_table_data(table_name: str, max_workers: int = 4, batch_size: int = 100
             save_current_batch()
 
     elapsed_total = time.time() - start_time
-    avg_rate = shared_state['total_items'] / elapsed_total if elapsed_total > 0 else 0
+    avg_rate = shared_state["total_items"] / elapsed_total if elapsed_total > 0 else 0
 
     print(
         f"📊 Scan completed in {elapsed_total:.1f}s | "
@@ -162,7 +183,7 @@ def dump_table_data(table_name: str, max_workers: int = 4, batch_size: int = 100
         f"Average rate: {avg_rate:.0f} items/sec"
     )
 
-    return shared_state['total_items']
+    return shared_state["total_items"]
 
 
 def save_table_data_batch(
@@ -216,34 +237,40 @@ def load_json_data(conn, raw_data_dir: str):
     # Define table patterns for the three main tables (with correct hyphens)
     table_patterns = {
         "GforceStore-notow4pikzczbpjg42gytvbuci-production": "stores_raw",
-        "GforceTasks-notow4pikzczbpjg42gytvbuci-production": "tasks_raw", 
-        "GforceCallCycle-notow4pikzczbpjg42gytvbuci-production": "call_cycles_raw"
+        "GforceTasks-notow4pikzczbpjg42gytvbuci-production": "tasks_raw",
+        "GforceCallCycle-notow4pikzczbpjg42gytvbuci-production": "call_cycles_raw",
     }
-    
+
     for table_pattern, view_name in table_patterns.items():
         # Use glob pattern to match both single files and batch files
         glob_pattern = os.path.join(raw_data_dir, f"{table_pattern}*.json")
-        
+
         print(f"Loading {view_name} from pattern: {glob_pattern}")
-        
+
         try:
             # Create table using glob pattern (replace hyphens with underscores for SQL table name)
-            table_name = table_pattern.replace('-', '_')
-            conn.execute(f"""
+            table_name = table_pattern.replace("-", "_")
+            conn.execute(
+                f"""
                 CREATE OR REPLACE TABLE {table_name} AS
                 SELECT * FROM read_json_auto('{glob_pattern}', union_by_name=true, ignore_errors=true)
-            """)
-            
+            """
+            )
+
             row_count = conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
             print(f"Loaded {row_count:,} rows into {view_name}")
-            
+
             # Create simplified alias view
-            conn.execute(f"CREATE OR REPLACE VIEW {view_name} AS SELECT * FROM {table_name}")
-            
+            conn.execute(
+                f"CREATE OR REPLACE VIEW {view_name} AS SELECT * FROM {table_name}"
+            )
+
         except Exception as e:
             print(f"Warning: Could not load {view_name} - {e}")
             # Create empty view as fallback
-            conn.execute(f"CREATE OR REPLACE VIEW {view_name} AS SELECT NULL as placeholder WHERE FALSE")
+            conn.execute(
+                f"CREATE OR REPLACE VIEW {view_name} AS SELECT NULL as placeholder WHERE FALSE"
+            )
 
 
 def execute_sql_models(conn, models_dir: str, transform_dir: str = "transform"):
@@ -291,8 +318,10 @@ def export_transformed_tables(conn, output_dir: str):
         table_name = table_row[0]
 
         # Skip raw data tables and views
-        if (not any(raw_table in table_name for raw_table in ["GforceTasks", "GforceStore", "GforceCallCycle"])
-            and not table_name.endswith("_raw")):
+        if not any(
+            raw_table in table_name
+            for raw_table in ["GforceTasks", "GforceStore", "GforceCallCycle"]
+        ) and not table_name.endswith("_raw"):
 
             output_path = os.path.join(output_dir, f"{table_name}.parquet")
             conn.execute(f"COPY {table_name} TO '{output_path}' (FORMAT PARQUET)")
@@ -320,24 +349,35 @@ def sync_tables_to_postgres(conn):
         table_name = table_row[0]
 
         # Skip raw data tables, views, and temporary tables
-        if (not table_name.endswith("_raw")
-            and not any(raw_table in table_name for raw_table in ["GforceTasks", "GforceStore", "GforceCallCycle"])
-            and table_name != "tmp"):
+        if (
+            not table_name.endswith("_raw")
+            and not any(
+                raw_table in table_name
+                for raw_table in ["GforceTasks", "GforceStore", "GforceCallCycle"]
+            )
+            and table_name != "tmp"
+        ):
 
             try:
                 # Create table structure in PostgreSQL if it doesn't exist
-                conn.execute(f"""
+                conn.execute(
+                    f"""
                     CREATE TABLE IF NOT EXISTS postgres_db.{table_name} AS
                     (SELECT * FROM {table_name} LIMIT 0)
-                """)
+                """
+                )
 
                 # Replace table data in PostgreSQL
-                conn.execute(f"""
+                conn.execute(
+                    f"""
                     CREATE OR REPLACE TABLE postgres_db.tmp AS
                     (SELECT * FROM {table_name})
-                """)
+                """
+                )
 
-                row_count = conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
+                row_count = conn.execute(
+                    f"SELECT COUNT(*) FROM {table_name}"
+                ).fetchone()[0]
                 if row_count > 0:
                     synced_count += 1
                     print(f"Synced {table_name}: {row_count:,} rows")
@@ -385,4 +425,3 @@ def run_sql_transforms(
         raise
     finally:
         conn.close()
-

@@ -4,7 +4,13 @@ import shutil
 from time import sleep
 import typer
 from dotenv import load_dotenv
-from dynamo_utils import print_table_indexes, dump_table_data, save_table_data, run_sql_transforms, sync_tables_to_postgres
+from dynamo_utils import (
+    print_table_indexes,
+    dump_table_data,
+    save_table_data,
+    run_sql_transforms,
+    sync_tables_to_postgres,
+)
 
 load_dotenv()
 
@@ -21,12 +27,13 @@ TABLE_DYNAMO_STORE = "GforceStore-notow4pikzczbpjg42gytvbuci-production"
 TABLE_DYNAMO_CALLS = "GforceCallCycle-notow4pikzczbpjg42gytvbuci-production"
 dynamo_tables = [TABLE_DYNAMO_STORE, TABLE_DYNAMO_CALLS, TABLE_DYNAMO_TASKS]
 
+
 def cleanup():
     try:
         shutil.rmtree(DATA_DIR_BAK)
         shutil.move(DATA_DIR, DATA_DIR_BAK)
     except Exception:
-        pass # Could be initial run
+        pass  # Could be initial run
 
 
 @app.command()
@@ -37,7 +44,9 @@ def extract():
     for table_name in dynamo_tables:
         print(f"Extracting data from {table_name}...")
         total_items = dump_table_data(table_name, max_workers=2)
-        print(f"Completed extraction for {table_name}: {total_items} items saved in batches\n")
+        print(
+            f"Completed extraction for {table_name}: {total_items} items saved in batches\n"
+        )
 
 
 @app.command()
@@ -77,11 +86,13 @@ def load():
     finally:
         conn.close()
 
+
 @app.command()
 def etl():
     extract()
     transform()
     load()
+
 
 @app.command()
 def watch():
