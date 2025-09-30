@@ -188,7 +188,7 @@ OR REPLACE TABLE tmp AS (
       ),
       -- Newer Timestamp
       STRPTIME (
-        regexp_extract (key, '(\d{8}-\d{6})\.jpg$', 1),
+        NULLIF(regexp_extract (key, '(\d{8}-\d{6})\.jpg$', 1), ''),
         '%d%m%Y-%H%M%S'
       )
     ) AS photo_datetime
