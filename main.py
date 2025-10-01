@@ -9,6 +9,7 @@ from dynamo_utils import (
     dump_table_data,
     run_sql_transforms,
 )
+from postgres.logging import SyncLogger
 
 load_dotenv()
 
@@ -39,12 +40,15 @@ def extract():
     """Extract data from source."""
     # Remove any old data
     cleanup()
+    total_extracted = 0
     for table_name in dynamo_tables:
         print(f"Extracting data from {table_name}...")
-        total_items = dump_table_data(table_name, max_workers=2)
+        table_items = dump_table_data(table_name, max_workers=2)
+        total_extracted += table_items
         print(
-            f"Completed extraction for {table_name}: {total_items} items saved in batches\n"
+            f"Completed extraction for {table_name}: {table_items} items saved in batches\n"
         )
+    return total_extracted
 
 
 @app.command()
@@ -87,9 +91,26 @@ def load():
 
 @app.command()
 def etl():
-    extract()
-    transform()
-    load()
+    """Run the complete ETL process with logging."""
+    logger = SyncLogger("dynamo-to-postgres-etl")
+    
+    try:
+        logger.start_sync()
+        
+        # Extract
+        total_records = extract()
+        
+        # Transform  
+        transform()
+        
+        # Load
+        load()
+        
+        logger.end_sync(status="completed", records_processed=total_records)
+        
+    except Exception as e:
+        logger.end_sync(status="failed", error_message=str(e))
+        raise
 
 
 @app.command()
